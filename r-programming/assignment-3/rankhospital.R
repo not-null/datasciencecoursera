@@ -75,6 +75,19 @@ rankhospital <- function(state, outcome, num = "best")
             list.hospital$Hospital.Name[as.numeric(num)]
         }
     }
-    
-    
 }
+
+# Submit test case's
+
+# rankhospital("NC", "heart attack", "worst")
+# [1] "WAYNE MEMORIAL HOSPITAL"
+
+# rankhospital("WA", "heart attack", 7)
+# [1] "YAKIMA VALLEY MEMORIAL HOSPITAL"
+
+
+# rankhospital("WA", "pneumonia", 1000)
+# [1] "NA"
+
+# rankhospital("NY", "heart attak", 7)
+# Error in rankhospital("NY", "heart attak", 7) : invalid outcome

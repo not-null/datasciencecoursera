@@ -155,10 +155,25 @@ baltimore.emissions &lt;- baltimore.emissions %&gt;% group_by(year, type) %&gt;%
 <p>From the plot, we can conclude that,</p>
 <ul>
 <li><span style="color:red;">NONPOINT, NON-ROAD, ON-ROAD</span> have seen decreases.</li>
-<li><span style="color:red;">POINT</span> has seen increased.</li>
+<li><span style="color:red;">POINT</span> has seen increases.</li>
 </ul>
 <ol start="4" style="list-style-type: decimal">
-<li><p>Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?</p></li>
+<li>Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?</li>
+</ol>
+<p>First we need to seggregate all coal combustion related sources from the SCC data frame</p>
+<pre><code>coal.sector &lt;- SCC[grep(&quot;Coal&quot;, SCC$EI.Sector),]</code></pre>
+<p>Next, using above data frame and NEI data frame, get the common data by SCC applying inner join. Group and summarise the data by year.</p>
+<pre><code>nei.join &lt;- inner_join(NEI,coal.sector, by = &quot;SCC&quot;)
+caal.data &lt;- nei.join %&gt;% group_by(year) %&gt;% summarise(Emissions = sum(Emissions))</code></pre>
+<p>Finally plot the graph using barplot</p>
+<pre><code>barplot(caal.data$Emissions/100000, caal.data$year,
+        names.arg = caal.data$year, 
+        xlab = &quot;Year&quot;, ylab = &quot;Total Emissions - Unit (10 ^ 5) Tons&quot;, 
+        col = rainbow(20),
+        ylim = c(0,8),
+        main = &quot;Total PM2.5 Emission - Coal Combustion Related Sources&quot;, border = &quot;blue&quot;, density = c(10,20,30,40))
+dev.off()</code></pre>
+<ol start="5" style="list-style-type: decimal">
 <li><p>How have emissions from motor vehicle sources changed from 1999–2008 in <strong>Baltimore City</strong>?</p></li>
 <li><p>Compare emissions from motor vehicle sources in Baltimore City with emissions from motor vehicle sources in <strong>Los Angeles County</strong>, California (<span style="color:red;">fips == “06037”</span>). Which city has seen greater changes over time in motor vehicle emissions?</p></li>
 </ol>

@@ -1,5 +1,4 @@
 # Code Book
-- [Code Book](#code-book)
 - [About Data](#about-data)
 - [Data Files](#data-files)
 - [Variables](#variables)

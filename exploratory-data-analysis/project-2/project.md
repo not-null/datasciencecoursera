@@ -1,13 +1,20 @@
----
-title: "Exploratory Data Analysis - Course Project 2"
-output:
-  html_document:
-    highlight: monochrome
-    number_sections: false
-    theme: readable
-    toc: yes
+# Exploratory Data Analysis - Course Project 2
 
----
+- [Introduction](#introduction)
+- [Data](#data)
+- [Assignment ](#assignment)
+    - [Making and Submitting Plots](#making-and-submitting-plots)
+- [Common Code](#common-code)
+- [Existence check](#existence-check)
+- [Questions & Answers](#questions-answers)
+    - [1. Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? Using the **base** plotting system, make a plot showing the total PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.](#1-have-total-emissions-from-pm25-decreased-in-the-united-states-from-1999-to-2008-using-the-base-plotting-system-make-a-plot-showing-the-total-pm25-emission-from-all-sources-for-each-of-the-years-1999-2002-2005-and-2008)
+    - [2. Have total emissions from PM2.5 decreased in the **Baltimore City**, Maryland (<span style="color:red;">fips == "24510"</span>) from 1999 to 2008? Use the **base** plotting system to make a plot answering this question.](#2-have-total-emissions-from-pm25-decreased-in-the-baltimore-city-maryland-span-stylecolorredfips-24510span-from-1999-to-2008-use-the-base-plotting-system-to-make-a-plot-answering-this-question)
+    - [3. Of the four types of sources indicated by the <span style="color:red;">type</span> (point, nonpoint, onroad, nonroad) variable, which of these four sources have seen decreases in emissions from 1999–2008 for **Baltimore City**? Which have seen increases in emissions from 1999–2008? Use the **ggplot2** plotting system to make a plot answer this question.](#3-of-the-four-types-of-sources-indicated-by-the-span-stylecolorredtypespan-point-nonpoint-onroad-nonroad-variable-which-of-these-four-sources-have-seen-decreases-in-emissions-from-19992008-for-baltimore-city-which-have-seen-increases-in-emissions-from-19992008-use-the-ggplot2-plotting-system-to-make-a-plot-answer-this-question)
+    - [4. Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?](#4-across-the-united-states-how-have-emissions-from-coal-combustionrelated-sources-changed-from-19992008)
+    - [5. How have emissions from motor vehicle sources changed from 1999–2008 in **Baltimore City**?](#5-how-have-emissions-from-motor-vehicle-sources-changed-from-19992008-in-baltimore-city)
+    - [6. Compare emissions from motor vehicle sources in Baltimore City with emissions from motor vehicle sources in **Los Angeles County**, California (<span style="color:red;">fips == "06037"</span>). Which city has seen greater changes over time in motor vehicle emissions?](#6-compare-emissions-from-motor-vehicle-sources-in-baltimore-city-with-emissions-from-motor-vehicle-sources-in-los-angeles-county-california-span-stylecolorredfips-06037span-which-city-has-seen-greater-changes-over-time-in-motor-vehicle-emissions)
+
+************
 ************
 This document contains the project work including questions and corresponding answers. When required explanation is also provided.
 

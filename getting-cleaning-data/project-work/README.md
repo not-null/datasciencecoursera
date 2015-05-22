@@ -1,5 +1,7 @@
 # Project - Getting and Cleaning Data
 
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
 - [About Project](#)
 - [Project Data](#)
 - [Project Objective](#)

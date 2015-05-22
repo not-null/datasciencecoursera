@@ -1,12 +1,10 @@
 # Project - Getting and Cleaning Data
 
-**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
-
-- [About Project](#)
-- [Project Data](#)
-- [Project Objective](#)
-- [R Script](#)
-- [Code Book](#)
+- [About Project](#about-project)
+- [Project Data](#project-data)
+- [Project Objective](#project-objective)
+- [R Script](#r-script)
+- [Code Book](#code-book)
 
 *********
 # About Project

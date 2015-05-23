@@ -46,14 +46,8 @@ Below are the variable objects constructed after reading the data files.
 
 Name                        |   Information
 -------------               |   -------------
-activity.labels             |   This object represents activities performed read from `activity_lables.txt`.
-features                    |   This objects represents features calculated read from `features.txt`.
-test.observations           |   This objects represents test data read from `X_test.txt`.
-test.activity               |   This objects represents test activity data read from `y_test.txt`.
-test.subjects               |   This objects represents test subjects data read from `subjects_test.txt`.
-train.observations          |   This objects represents training data read from `X_train.txt`.
-train.activity              |   This objects represents training activity data read from `y_train.txt`.
-train.subjects              |   This objects represents training subjects data read from `subjects_train.txt`.
+files                       |   All the files that will be read.
+data                        |   This is a list of data frame objects corresponds to each input data file. This is the core wholesome data object.
 
 # Transformations
 
@@ -74,8 +68,9 @@ final.merge.filtered        |   `final.merge` was filtered by column names havin
 
 ## Descriptive and Labelling
 
-1. `final.merge.filtered` data frame column name `Activity` values were then given appropriate descriptive activity name from `activity.lables` object. 
-2. `final.merge.filtered` data frame column names (except Activity and Subjects) were then appropriately labelled with descriptive variable names. 
+1. `final.merge.filtered` data frame column name (`Activity`) values were then given appropriate descriptive name from `data$activity_labels` data frame object. 
+
+2. `final.merge.filtered` data frame column names (except `Activity and Subjects`) were then appropriately labelled with descriptive variable names. 
 
 Any column name having :
 ```

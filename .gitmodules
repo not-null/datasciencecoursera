@@ -1,0 +1,3 @@
+[submodule "reproducible-research"]
+	path = reproducible-research
+	url = https://github.com/rdpeng/RepData_PeerAssessment1.git

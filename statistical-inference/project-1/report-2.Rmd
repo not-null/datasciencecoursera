@@ -1,0 +1,137 @@
+# Exponential Distribution - Analyzing ToothGrowth Dataset
+### Author: Himanshu Rawat
+### Date: 14Jun 2015
+
+- [Overview](#overview)
+- [Load the ToothGrowth data and perform some basic exploratory data analyses](#load-the-toothGrowth-data-and-perform-some-basic-exploratory-data-analyses)
+- [Provide a basic summary of the data](#provide-a-basic-summary-of-the-data)
+- [Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose (Only use the techniques from class, even if there's other approaches worth considering)](#use-confidence-intervals-andor-hypothesis-tests-to-compare-tooth-growth-by-supp-and-dose-only-use-the-techniques-from-class-even-if-theres-other-approaches-worth-considering)
+- [State your conclusions and the assumptions needed for your conclusions](#state-your-conclusions-and-the-assumptions-needed-for-your-conclusions)
+
+***********
+
+## Overview
+
+We need to analyze `ToothGrowth` Dataset that comes with R package. `ToothGrowth` dataset contatins **the effect of Vitamin C on the Tooth Growth in Guinea Pigs.
+
+The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+## Load the ToothGrowth data and perform some basic exploratory data analyses
+
+Below scripts loads the dataset and peek into it.
+
+```{r}
+library(datasets)
+data(ToothGrowth)
+summary(ToothGrowth)
+str(ToothGrowth)
+```
+Some basic exploratory data analyses.
+```{r}
+library(ggplot2,warn.conflicts = FALSE, verbose = FALSE)
+# Total length of tooth by each levels of vitamin doses(0.5,1,2) for each supplement type
+tooth.len.data <- aggregate(ToothGrowth$len ~ ToothGrowth$supp + ToothGrowth$dose, data = ToothGrowth, sum)
+colnames(tooth.len.data) <- c("supplement_type", "dose", "length_total")
+
+plot <- qplot(tooth.len.data$dose, tooth.len.data$length_total, data=tooth.len.data, geom ="line", linetype=tooth.len.data$supplement_type)
+plot <- plot + ggtitle("Tooth Growth Plot")
+plot <- plot + xlab("Dose (milligrams)") + ylab("Total Length")
+plot <- plot + labs(linetype = "Dose Type")
+plot
+
+```
+
+Information from graph :
+
+* For higher values of dosages (2.0 mg) for both dose types (OJ,VC), tooth length is almost equal.
+* For lower values of dosages (1.0 mg), dose type (OJ) has more tooth length than dose type (VC).
+* As dosage values increases, tooth length are increasing for both dose types.
+
+## Provide a basic summary of the data
+
+We are reporting the mean and standard deviation.
+```{r}
+tooth.mean.data <- aggregate(ToothGrowth$len ~ ToothGrowth$supp + ToothGrowth$dose, data = ToothGrowth, mean)
+colnames(tooth.mean.data) <- c("supplement_type", "dose", "average")
+
+tooth.sd.data <- aggregate(ToothGrowth$len ~ ToothGrowth$supp + ToothGrowth$dose, data = ToothGrowth, sd)
+colnames(tooth.sd.data) <- c("supplement_type", "dose", "sd")
+
+tooth.mean.data
+tooth.sd.data
+
+```
+
+## Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+
+We will be using `t test` for the comparisons. 
+
+Null hypothesis says 
+
+* Population means are equal.
+* Two groups are from the sample population.
+
+Normally, we want to reject the Null hypothesis and support the alternative hypothesis. 
+
+Often we assume 5 % p-value as the boundary to assume we have evidence to reject the null hypothesis. 
+
+* If p <= 5 %, sufficient evidence of difference and reject null hypothesis
+* If p > 5 %, not sufficient evidence of difference and accept null hypothesis.
+
+### Whether different supplement types(OJ and VC) results in equal length of tooth growth?
+
+* Null hypothesis : OJ and VC results in equal tooth lengths.
+* Alternative hypothesis: OJ and VC results in unequal tooth lengths.
+
+```{r}
+print(supp.test <- t.test(len ~ supp, data = ToothGrowth))
+```
+
+We can see that `p-value` from out test is `r supp.test$p.value * 100` %. That means probability of the sampling data we sampled given that there is no difference in lengths in the two supplement types is `r supp.test$p.value * 100` %. 
+
+Interpretation: 
+
+* Different supplements types results in equal tooth lengths.
+
+### Whether different supplement types having dose quantities (0.5,1.0,2.0) results in equal length of tooth?
+
+* Null hypothesis : Different dosage quantites results in equal tooth lengths.
+* Alternative hypothesis: Different dosage quantites results in unequal tooth lengths.
+
+```{r}
+print(dose0.5 <- t.test(len ~ supp, data = ToothGrowth[ToothGrowth$dose == 0.5, ]))
+print(dose1.0 <- t.test(len ~ supp, data = ToothGrowth[ToothGrowth$dose == 1.0, ]))
+print(dose2.0 <- t.test(len ~ supp, data = ToothGrowth[ToothGrowth$dose == 2.0, ]))
+```
+Dose (mg)   |   p-value (%)
+----------  |   ----------
+0.5         |   `r dose0.5$p.value * 100`
+1.0         |   `r dose1.0$p.value * 100`
+2.0         |   `r dose2.0$p.value * 100`
+
+p-values for (0.5 and 1.0) dosages are < 5 %.
+p-values for (2.0) dosages are > 5 %.
+
+Interpretation:
+
+* Dose quantites (0.5 and 1.0) for both supplement results in different tooth lengths.
+* Dose quantity (2.0) for both supplement results in equal tooth lengths.
+
+**Our plot graph also depicts the same results.**
+
+## State your conclusions and the assumptions needed for your conclusions
+
+### Conclusions
+
+* Both supplement types results in equal tooth lengths when dose quantities are not considered.
+* Increased dose quantities for both supplement types results in increase in tooth length i.e. difference becomes smaller.
+* Supplement type (OJ) has more tooth length than (OJ) with lower dose quantites.
+* Dose quantity (2.0) for both supplements do not have different tooth lengths.
+
+### Assumptions
+
+* Variance is estimated separately for groups.
+* Data is not paired.
+* Guniea Pigs are measured only once for every measurment parameters. 
+* Sample population is not too big.
+

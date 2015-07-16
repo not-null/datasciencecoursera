@@ -1,0 +1,185 @@
+---
+output: html_document
+---
+# Machine Learning - Predicting Exercise Behavior
+### Author: Himanshu Rawat
+### Date: 16th July, 2015
+
+- [Objective](#objective)
+- [Collecting Data](#collecting-data)
+- [Exploring and Preparing Data](#exploring-and-preparing-data)
+- [Training Model on the Data](#training-model-on-the-data)
+- [Tunning and Optimising the Model](#tunning-and-optimising-the-model)
+- [Evaluating Model Performance](#evaluating-model-performance)
+- [Apply Machine Learning Algorithm](#apply-machine-learning-algorithm)
+- [Appendix](#appendix)
+
+******************
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+knitr::opts_chunk$set(clean=FALSE)
+```
+
+## Objective
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it.
+
+The goal of project is to predict the manner in which they did the exercise. It's `classe` variable in the training set.
+
+classe  | Explanation
+------- | ------------
+A       | Specified execution of the exercise
+B       | Throwing elbows to the front
+C       | Lifting the dumbbell only halfway
+D       | Lowering the dumbbell only halfway
+E       | Throwing the hips to the front
+
+We will build a training model on the data and finally applying machine learning algorithm to the test data set.
+
+## Collecting Data
+
+Download [Training](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv) and [Test](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv) data sets.
+
+```{r echo=FALSE}
+library(plyr, warn.conflicts = FALSE, quietly = TRUE)
+library(caret, warn.conflicts = FALSE, quietly = TRUE)
+library(C50, warn.conflicts = FALSE, quietly = TRUE)
+library(irr, warn.conflicts = FALSE, quietly = TRUE)
+library(gmodels,warn.conflicts = FALSE, quietly = TRUE)
+```
+
+## Exploring and Preparing Data
+```{r}
+har.raw <- read.csv(file = "pml-training.csv" , na.strings = c("", "NA") , stringsAsFactors = FALSE)
+```
+We have `159` predictors and `1` outcome (`classe`) variables. Due to the lack of subject matter knowledge, I need to eliminate obsolete and choose most relevant and influential predictors.
+
+Simple strategy is to select only those columns having < 50 percent (`NA`|`empty`) values.
+```{r}
+har.raw <- har.raw[, colSums(is.na(har.raw)) < nrow(har.raw) * 0.5]
+```
+Now we have `r ncol(har.raw)` columns. Again peeking into the data set, first seven columns can be removed intuitively.
+```{r}
+str(har.raw[,1:7])
+har.raw <- har.raw[,8:60]
+```
+And, finally convert outcome variable (`classe`) to factors.
+```{r}
+har.raw$classe <- as.factor(har.raw$classe)
+```
+To evaluate the performance of our training model, we need another data for validation. Lets partition the training data set.
+```{r}
+har.rows <- createDataPartition(har.raw$classe, p = 0.75, list = FALSE)
+har.train <- har.raw[har.rows,]
+har.validate <- har.raw[-har.rows,]
+data.frame(har.raw = dim(har.raw), har.train = dim(har.train), har.validate = dim(har.validate), row.names = c("rows", "columns"))
+```
+
+```{r echo= FALSE}
+rm(har.raw) # Remove the original one
+```
+Density plot of `classe` variable shows class `A` is right skewed and class `B,C,D,E` almost following a standard normal distribution. 
+
+[Appendix - Classe Distribution](#classe-distribution)
+
+## Training Model on the Data
+
+We will use `C5.0` algorithm for training our decision tree model. Lets begin with simple model and see its performance by applying on validation data set.
+```{r}
+har.test.model <- C5.0(classe ~ ., data = har.train, method = "C5.0")
+temp.predict <- predict(har.test.model,har.validate)
+```
+Statistics from `confusion matrix`
+```{r}
+cm <- confusionMatrix(temp.predict,har.validate$classe, dnn = c("Actual Classe", "Predicted Classe"))
+cm
+```
+Resulting in an : 
+
+1. Accuracy of `r round(x = cm$overall[1] * 100, digits = 2)` percent.
+2. Error rate of `r 100 - (round(x = cm$overall[1] * 100, digits = 2))` percent.
+
+Our measurement of model performance i.e. `kappa` statistic is `r round(x = cm$overall[2] * 100, digits = 2)`.
+
+Overall, model performance is good but there is always room for improvement.
+```{r echo= FALSE}
+rm(har.test.model)
+rm(temp.predict)
+rm(cm)
+```
+## Tunning and Optimising the Model
+
+Next, we will tune our model and improve accuracy of decision tree with adaptive boosting. Here our goal is to optimise our model using `caret` package.
+
+By setting the seed parameter (in this case to the arbitrary number 123), the random 
+numbers will follow a predefined sequence. This allows simulations like train(), which use random sampling, to be repeated with identical results.
+```{r}
+set.seed(123)
+```
+Create a set of configuration options known as a control object. These options allow for the management of model evaluation criteria such as the resampling strategy and the measure used for choosing the best model.
+
+Here our resampling strategy is `k-fold cross-validation` and `oneSE` to select the optimal model among the various candidates.
+```{r}
+ctrl <- trainControl(method = "cv", number = 10, selectionFunction = "oneSE")
+```
+Create a grid of parameters to optimize. The grid must include a column for each parameter in the desired model, prefixed by a period.
+```{r}
+grid <- expand.grid(.model = "tree", .trials = c(1, 5, 10, 15, 20, 25, 30, 35),
+                    .winnow = "FALSE")
+```
+`Kappa` indicates the statistic to be used by the model evaluation function `oneSE`.
+```{r}
+har.model <- train(classe ~ ., data = har.train, method = "C5.0",
+                   metric = "Kappa", trControl = ctrl, tuneGrid = grid)
+print(har.model)
+```
+## Evaluating Model Performance
+
+`Kappa` statistic adjusts accuracy by accounting for the possibility of a correct prediction by chance alone.
+
+1. 1 = Indicates perfect agreement between the model's predictions and the true values, rarely happens.
+2. < 1 = Indicates imperfect agreement. Closer the value to 1, better the performance.
+
+Now that we have trained and tuned our model, lets evaluate this improved model on our validation data set.
+```{r}
+har.predict <- predict(har.model,har.validate)
+cm <- confusionMatrix(har.predict,har.validate$classe, dnn = c("Actual Classe", "Predicted Classe"))
+cm
+```
+Resulting in an : 
+
+1. Accuracy of `r round(x = cm$overall[1] * 100, digits = 2)` percent.
+2. Error rate of `r 100 - (round(x = cm$overall[1] * 100, digits = 2))` percent.
+
+Our measurement of model performance i.e. `kappa` statistic is `r round(x = cm$overall[2] * 100, digits = 2)`.
+
+And there was room for improvement. Great!!
+
+## Apply Machine Learning Algorithm
+
+Now we can apply this model which have trained and tuned to real test data set to predict the `classe` for each observation.
+```{r}
+har.test <- read.csv(file = "pml-testing.csv" , na.strings = c("", "NA") , stringsAsFactors = FALSE)
+har.test <- har.test[, colSums(is.na(har.test)) < nrow(har.test) * 0.5]
+har.test <- har.test[,8:60]
+predicted.outcome <- predict(har.model,har.test)
+final.predictions <- data.frame(problem_id = har.test$problem_id, classe = predicted.outcome)
+```
+Our predictions :
+```{r}
+final.predictions
+```
+Store the final predictions
+```{r}
+write.table(final.predictions,file="exercise_predictions.txt", row.names = FALSE)
+```
+
+## Appendix
+
+### Classe Distribution
+```{r echo=FALSE, results='asis', fig.width=12, fig.height=12}
+ggplot(har.train, aes(x = classe)) + geom_density()
+```
+
+*********************

@@ -8,4 +8,6 @@
 4. [Exploratory Data Analysis](https://www.coursera.org/course/exdata)
 5. [Reproducible Research](https://www.coursera.org/course/repdata)
 6. [Statistical Inference](https://www.coursera.org/course/statinference)
+7. [Regression Models](https://www.coursera.org/course/regmods)
+8. [Practical Machine Learning](https://www.coursera.org/course/predmachlearn)
 
